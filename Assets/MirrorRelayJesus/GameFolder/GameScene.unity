@@ -398,6 +398,7 @@ GameObject:
   - component: {fileID: 936370972}
   - component: {fileID: 936370971}
   - component: {fileID: 936370970}
+  - component: {fileID: 936370974}
   - component: {fileID: 936370973}
   m_Layer: 0
   m_Name: NetworkManager
@@ -439,7 +440,7 @@ MonoBehaviour:
   sendRate: 30
   unreliableBaselineRate: 1
   unreliableRedundancy: 0
-  transport: {fileID: 936370973}
+  transport: {fileID: 936370974}
   networkAddress: localhost
   maxConnections: 100
   disconnectInactiveConnections: 0
@@ -491,7 +492,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 936370967}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b0fecffa3f624585964b0d0eb21b18e, type: 3}
+  m_Script: {fileID: 11500000, guid: 3600ae6d28baa418d9972d6eea1505c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  logMode: 1
+  relayIP: 127.0.0.1
+  relayPort: 9001
+  hostId: HostA
+  gamePort: 9000
+  maxPlayers: 8
+  heartbeatInterval: 11
+  minHeartbeatGap: 0.25
+--- !u!114 &936370974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936370967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a99d2da036cfe4c3684f2c53c5508507, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   port: 7777
@@ -511,6 +532,12 @@ MonoBehaviour:
   debugLog: 0
   statisticsGUI: 0
   statisticsLog: 0
+  logMode: 1
+  useRelay: 1
+  relayAddress: 127.0.0.1
+  relayPort: 7778
+  useTokenAuth: 1
+  tokenSecret: MY_SECRET_TOKEN
 --- !u!1 &1268272906
 GameObject:
   m_ObjectHideFlags: 0
