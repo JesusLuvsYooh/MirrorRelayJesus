@@ -131,29 +131,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 395221213}
-  - component: {fileID: 395221212}
+  - component: {fileID: 395221214}
   m_Layer: 0
-  m_Name: Console
+  m_Name: RelayServerUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &395221212
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 395221211}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6049aacbd379f4a789bc031c153b8827, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  logMode: 1
-  relay: {fileID: 1537045061}
-  windowSize: {x: 400, y: 400}
 --- !u!4 &395221213
 Transform:
   m_ObjectHideFlags: 0
@@ -169,6 +154,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &395221214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395221211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6324769291c7d48a8af9446f5be42fd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  relayServer: {fileID: 1537045062}
 --- !u!1 &1537045059
 GameObject:
   m_ObjectHideFlags: 0
@@ -178,7 +176,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1537045060}
-  - component: {fileID: 1537045061}
+  - component: {fileID: 1537045062}
   m_Layer: 0
   m_Name: RelayServer
   m_TagString: Untagged
@@ -201,7 +199,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1537045061
+--- !u!114 &1537045062
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -210,10 +208,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1537045059}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5bb0fea2f418442696bcfece2283c1d, type: 3}
+  m_Script: {fileID: 11500000, guid: 1fa98c3639cc44445b0d1bd1d2f69eae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  logMode: 1
 --- !u!1 &1914262157
 GameObject:
   m_ObjectHideFlags: 0

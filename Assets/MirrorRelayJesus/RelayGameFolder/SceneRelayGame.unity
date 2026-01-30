@@ -399,7 +399,7 @@ GameObject:
   - component: {fileID: 936370971}
   - component: {fileID: 936370970}
   - component: {fileID: 936370974}
-  - component: {fileID: 936370973}
+  - component: {fileID: 936370975}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -483,26 +483,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &936370973
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 936370967}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3600ae6d28baa418d9972d6eea1505c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  logMode: 1
-  relayIP: 127.0.0.1
-  relayPort: 9001
-  hostId: HostA
-  gamePort: 9000
-  maxPlayers: 8
-  heartbeatInterval: 11
-  minHeartbeatGap: 0.25
 --- !u!114 &936370974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -533,11 +513,18 @@ MonoBehaviour:
   statisticsGUI: 0
   statisticsLog: 0
   logMode: 1
-  useRelay: 1
-  relayAddress: 127.0.0.1
-  relayPort: 7778
-  useTokenAuth: 1
-  tokenSecret: MY_SECRET_TOKEN
+--- !u!114 &936370975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936370967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dae2f3b2f55ee4720b98d33df80224ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1268272906
 GameObject:
   m_ObjectHideFlags: 0

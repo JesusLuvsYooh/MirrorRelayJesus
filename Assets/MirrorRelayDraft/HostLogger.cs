@@ -49,8 +49,8 @@ public class HostLogger : MonoBehaviour
     // ================================
 
     [Header("Relay")]
-    [SerializeField] private string relayIP = "127.0.0.1";
-    [SerializeField] private int relayPort = 9001;   // MUST match relay host registry port
+    [SerializeField] private string relayRegisteryIP = "127.0.0.1";
+    [SerializeField] private int relayRegisteryPort = 9001;   // MUST match relay host registry port
     [SerializeField] private string hostId = "HostA"; // Unique per host instance
 
     // ================================
@@ -253,7 +253,7 @@ public class HostLogger : MonoBehaviour
     void Send(string msg)
     {
         byte[] data = Encoding.UTF8.GetBytes(msg);
-        udp.Send(data, data.Length, relayIP, relayPort);
+        udp.Send(data, data.Length, relayRegisteryIP, relayRegisteryPort);
     }
 
     // ================================
