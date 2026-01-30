@@ -112,7 +112,7 @@ public class MultiClientUdpRelay : MonoBehaviour
     // =====================================================
 
     [Header("Security")]
-    private bool useTokenAuth = true;
+    private bool useTokenAuth = false;
     private string validToken = "MY_SECRET_TOKEN";
 
     // =====================================================
