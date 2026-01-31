@@ -6,7 +6,7 @@ public class RelaySettings : MonoBehaviour
 {
     [Header("Relay Settings")]
     static public float handshakeGrace = 1f;
-    public int frameRate = 30;
+    static public int frameRate = 30;
 
     [Header("Relay Capacity Limits")]
     static public int maxRelayClients = 200;
@@ -32,8 +32,8 @@ public class RelaySettings : MonoBehaviour
     static public float endpointBlockTime = 11f;
     static public int maxStrikesPerIp = 5;
 
-    public const int MAX_HOST_PACKETS_PER_SEC = 5;
-    public const float HOST_COOLDOWN_TIME = 3f;
-    public const float MIN_HEARTBEAT_INTERVAL = 0.5f;
+    static int MAX_HOST_PACKETS_PER_SEC = 5;
+    static float HOST_COOLDOWN_TIME = 3f;
+    static float MIN_HEARTBEAT_INTERVAL = 0.5f;
 
 }

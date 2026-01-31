@@ -33,11 +33,15 @@ UDP multi client relay with host registry and limiters, for Mirror Netcode.
 
 
 # Development Notes:
-Settings variables! Separated into 3 files, Relay, Game and Shared - reasoning, we do not want to ship relay-specific settings to users, and we do not want to duplicate settings for sanity.
-Settings and Logs now statics, to be accessed without inspector references, and from anywhere.
+- Settings variables! Separated into 3 files, Relay, Game and Shared - reasoning, we do not want to ship relay-specific settings to users, and we do not want to duplicate settings for sanity.
+- Settings and Logs now statics, to be accessed without inspector references, and from anywhere.
 
-Separate player unity scene, originally was using a mirror example, not suitable long term for upgrading or overwriting mirror versions.
-Relay scene has temporary camera, as unity editors 'no camera detected' message is annoyingly covering up development ui.
+- Separate player unity scene, originally was using a mirror example, not suitable long term for upgrading or overwriting mirror versions.
+- Relay scene has temporary camera, as unity editors 'no camera detected' message is annoyingly covering up development ui.
 
+- Old draft files and scenes fixed to work again, allows referencing for newer refactor.
+
+- Host register data now signed and encrypted
+- NetworkManager now handles register/heartbeat for host servers.
 
 

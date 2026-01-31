@@ -14,46 +14,46 @@ public class RelayKcpTransport : KcpTransport
     public override void ClientConnect(string address)
     {
         // Relay disabled → behave exactly like normal KCP transport
-        if (!RelayGameSettings.useRelay)
+        if (!RelaySettingsGame.useRelay)
         {
-            RelaySharedSettings.Log("[Client] Relay disabled, connecting directly");
+            RelaySettingsShared.Log("[Client] Relay disabled, connecting directly");
             base.ClientConnect(address);
             return;
         }
 
         // Send authentication token
 
-        if (RelaySharedSettings.useTokenAuth)
+        if (RelaySettingsShared.useTokenAuth)
         {
             try
             {
                 // Fire-and-forget UDP message to relay
                 using (UdpClient udp = new UdpClient())
                 {
-                    udp.Connect(RelayGameSettings.relayAddress, RelaySharedSettings.relayPort);
+                    udp.Connect(RelaySettingsGame.relayAddress, RelaySettingsShared.relayPort);
 
                     // Simple auth payload: AUTH|<token>
                     byte[] tokenPayload =
-                        Encoding.UTF8.GetBytes("AUTH|" + RelaySharedSettings.tokenSecret);
+                        Encoding.UTF8.GetBytes("AUTH|" + RelaySettingsShared.tokenSecret);
 
                     udp.Send(tokenPayload, tokenPayload.Length);
 
-                    RelaySharedSettings.Log($"[Client] Sent AUTH token to relay {RelayGameSettings.relayAddress}:{RelaySharedSettings.relayPort}");
+                    RelaySettingsShared.Log($"[Client] Sent AUTH token to relay {RelaySettingsGame.relayAddress}:{RelaySettingsShared.relayPort}");
                 }
             }
             catch (System.Exception ex)
             {
                 // Token send failure does NOT stop connection attempt
                 // Relay is responsible for rejecting invalid clients
-                RelaySharedSettings.LogError($"[Client] Failed to send AUTH token: {ex}");
+                RelaySettingsShared.LogError($"[Client] Failed to send AUTH token: {ex}");
             }
         }
 
-        Port = (ushort)RelaySharedSettings.relayPort;
+        Port = (ushort)RelaySettingsShared.relayPort;
 
-        RelaySharedSettings.Log($"[Client] Connecting via relay {RelayGameSettings.relayAddress}:{RelaySharedSettings.relayPort}");
+        RelaySettingsShared.Log($"[Client] Connecting via relay {RelaySettingsGame.relayAddress}:{RelaySettingsShared.relayPort}");
 
         // Connect to relay instead of direct server
-        base.ClientConnect(RelayGameSettings.relayAddress);
+        base.ClientConnect(RelaySettingsGame.relayAddress);
     }
 }
