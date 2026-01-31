@@ -26,14 +26,17 @@ public class RelaySettings : MonoBehaviour
     static public float hostRegisterVerifyTimeout = 30f;
     static public int maxPlayersPerHostOverwrite = 200;
 
+    static public int maxHostRejectStrikes = 3;
+    static public int hostBlocklistDuration = 86400; // 86400 = 24h
 
     static public float authGraceWindow = 5f;
     static public float rejectTime = 11f;
     static public float endpointBlockTime = 11f;
     static public int maxStrikesPerIp = 5;
 
-    static int MAX_HOST_PACKETS_PER_SEC = 5;
-    static float HOST_COOLDOWN_TIME = 3f;
-    static float MIN_HEARTBEAT_INTERVAL = 0.5f;
+    
+    static public int MAX_HOST_PACKETS_PER_SEC = 5;
+    static public float hostCooldownAmount = 3f;
+    static public float MIN_HEARTBEAT_INTERVAL = 0.5f;
 
 }

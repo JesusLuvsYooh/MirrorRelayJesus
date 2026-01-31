@@ -36,7 +36,13 @@ public class RelayServer : MonoBehaviour
 
         // manually call setup as Start does not auto run on those scripts
         relayServerHost.Setup();
+
+        InvokeRepeating(nameof(Repeater), 1.0f, 1.0f);
     }
 
-
+    // run a repeater to do cleanup or counters, rather than putting stuff in Update()
+    void Repeater()
+    {
+        relayServerHost.Cleanup();
+    }
 }

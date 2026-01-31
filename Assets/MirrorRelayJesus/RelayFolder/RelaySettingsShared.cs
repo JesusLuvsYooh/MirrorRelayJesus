@@ -17,6 +17,10 @@ public class RelaySettingsShared : MonoBehaviour
     // for now we're just having this unique per game project, so people without your game do not know it
     static public string hostRegisterSecret = "CHANGE_ME";
 
+    static public double nowTimestamp() =>
+        System.Diagnostics.Stopwatch.GetTimestamp() /
+        (double)System.Diagnostics.Stopwatch.Frequency;
+
     public enum LogMode
     {
         ErrorsOnly, // Production-safe
@@ -61,7 +65,7 @@ public class RelaySettingsShared : MonoBehaviour
     // ----------------------------------------------------------
     public static string Encrypt(string data, string secret)
     {
-        Log($"[Relay Settings] Encrypt: {data}");
+        //Log($"[Relay Settings] Encrypt: {data}");
         byte[] aesKey = CreateAesKey(secret);
         byte[] hmacKey = CreateHmacKey(secret);
 
@@ -89,7 +93,7 @@ public class RelaySettingsShared : MonoBehaviour
             Encoding.UTF8.GetBytes(encryptedBase64));
 
         string signatureBase64 = Convert.ToBase64String(signature);
-        Log($"[Relay Settings] Encrypted: {encryptedBase64 + "|" + signatureBase64}");
+        //Log($"[Relay Settings] Encrypted: {encryptedBase64 + "|" + signatureBase64}");
         // Final secure packet
         return encryptedBase64 + "|" + signatureBase64;
     }
@@ -99,7 +103,7 @@ public class RelaySettingsShared : MonoBehaviour
     // ----------------------------------------------------------
     public static string Decrypt(string packet, string secret)
     {
-        Log($"[Relay Settings] Decrypt: {packet}");
+        //Log($"[Relay Settings] Decrypt: {packet}");
         byte[] aesKey = CreateAesKey(secret);
         byte[] hmacKey = CreateHmacKey(secret);
 
@@ -138,7 +142,7 @@ public class RelaySettingsShared : MonoBehaviour
         byte[] decrypted = decryptor.TransformFinalBlock(
             cipher, 0, cipher.Length);
 
-        Log($"[Relay Settings] Decrypted: {Encoding.UTF8.GetString(decrypted)}");
+        //Log($"[Relay Settings] Decrypted: {Encoding.UTF8.GetString(decrypted)}");
         return Encoding.UTF8.GetString(decrypted);
     }
 

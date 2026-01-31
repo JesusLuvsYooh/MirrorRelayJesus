@@ -20,7 +20,7 @@ public class RelayGame : MonoBehaviour
     private bool hostRegistered;
     private float lastHeartbeatTime = -999f;
     private string hostUID;
-    //private Coroutine heartbeatCoroutine = HeartbeatCoroutine();
+    private string payload;
 
     /// Sets the KCP transport port so the relay knows where to forward traffic.
     void Awake()
@@ -44,18 +44,6 @@ public class RelayGame : MonoBehaviour
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void OnServerStarted()
     {
         udp = new UdpClient();
@@ -69,8 +57,6 @@ public class RelayGame : MonoBehaviour
         CancelInvoke(nameof(SendRegister));
         udp?.Close();
         udp = null;
-
-        RelaySettingsShared.Log("[Host] Server stopped, relay registration ended.");
     }
 
     public void SendRegister()
@@ -80,8 +66,6 @@ public class RelayGame : MonoBehaviour
             RelaySettingsShared.LogError($"[Host] Server not started.");
             return;
         }
-
-        string payload;
 
         if (hostRegistered == false)
         {
@@ -103,7 +87,7 @@ public class RelayGame : MonoBehaviour
         payload = RelaySettingsShared.Encrypt(payload, RelaySettingsShared.hostRegisterSecret);
         Send(payload);
 
-        RelaySettingsShared.Log($"[Host] Send register message.");
+        RelaySettingsShared.Log($"[Host] Sent register message.");
     }
 
     void Send(string msg)
