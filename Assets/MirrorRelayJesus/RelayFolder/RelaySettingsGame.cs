@@ -16,7 +16,8 @@ public class RelaySettingsGame : MonoBehaviour
 
     static public int maxPlayers = 8;
 
-    // How often the host sends heartbeats to the relay
+    // How often the host sends heartbeats to the relay, mirrors default timeout is 10s, so ive put 11s here.
+    // note, players joining/leaving etc also call heartbeat
     static public float heartbeatInterval = 11f;
 
     // Minimum gap between heartbeats, prevents spam if 10 players join at same time

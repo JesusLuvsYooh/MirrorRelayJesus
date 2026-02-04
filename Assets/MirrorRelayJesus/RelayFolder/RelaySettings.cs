@@ -17,9 +17,11 @@ public class RelaySettings : MonoBehaviour
     static public float handshakeTimeout = 3f;
 
     [Header("Rate Limiting")]
+    // higher dicts require more ram, eventually could slow down code lookups too, trims whilst leaveing 10% of old dict values
+    static public int trimDictionaryAtAmount = 1000;
     static public int maxPacketsPerSecondPerIp = 60;
-    static public float ipBlacklistDuration = 86400; // 24h
-
+    // 24h, ip block, not endpoint, this is quite strict and may block legit people in a bad network, however also feel free to set it to increase value if people abuse default cooldown 
+    static public float ipBlacklistDuration = 86400; 
     static public float clientTimeout = 15f;
 
     static public float hostTimeout = 15f;
@@ -38,5 +40,26 @@ public class RelaySettings : MonoBehaviour
     static public int MAX_HOST_PACKETS_PER_SEC = 5;
     static public float hostCooldownAmount = 3f;
     static public float MIN_HEARTBEAT_INTERVAL = 0.5f;
+
+    /// Trims a dictionary down by removing the oldest entries, if it exceeds the trim threshold.
+    public static void TrimIfTooLarge<TKey, TValue>(
+        Dictionary<TKey, TValue> dict)
+    {
+        if (dict == null) return;
+
+        if (dict.Count >= RelaySettings.trimDictionaryAtAmount)
+        {
+           // int removeCount = dict.Count / 10;
+            int removeCount = dict.Count - (dict.Count / 10);
+
+            // Snapshot keys (cannot modify dictionary while iterating)
+            var keys = new List<TKey>(dict.Keys);
+
+            for (int i = 0; i < removeCount; i++)
+            {
+                dict.Remove(keys[i]);
+            }
+        }
+    }
 
 }

@@ -40,7 +40,7 @@ UDP multi client relay with host registry and limiters, for Mirror Netcode.
 - Relay scene has temporary camera, as unity editors 'no camera detected' message is annoyingly covering up development ui.
 
 - Old draft files and scenes fixed to work again, allows referencing for newer refactor.
-
+- Trimmer for dictionary sizes.
 - Host register data now signed and encrypted
 - NetworkManager now handles register/heartbeat for host servers.
 

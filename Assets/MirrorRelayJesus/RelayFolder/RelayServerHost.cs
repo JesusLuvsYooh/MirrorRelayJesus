@@ -12,10 +12,21 @@ public class RelayServerHost
     private UdpClient hostRegisterListener;
     private string payload;
     private double nowTimestamp;
+
+    public Dictionary<string, RegisteredHostInfo> registeredHostInfo = new();
     private Dictionary<IPEndPoint, double> hostCooldownUntil = new();
-    private Dictionary<IPAddress, double> ipBlockedUntil = new();
+    public Dictionary<IPAddress, double> ipBlockedUntil = new();
     private Dictionary<string, int> hostRejectedCounter = new();
-    
+
+    public struct RegisteredHostInfo
+    {
+        public string hostUID;
+        public IPEndPoint hostIPEndpoint;
+        public int hostCurrentPlayers;
+        public int hostMaxPlayers;
+        public double hostSecondsSinceSeen;
+    }
+
 
     public void Setup()
     {
@@ -90,8 +101,26 @@ public class RelayServerHost
 
     public void Cleanup()
     {
-        RelaySettingsShared.LogWarning($"[Relay] Cleanup!");
+        //RelaySettingsShared.LogWarning($"[Relay] Cleanup!");
 
-        //hostRejectedCounter ipBlockedUntil hostCooldownUntil
+        nowTimestamp = RelaySettingsShared.nowTimestamp();
+
+        // remove expired
+        foreach (var ep in new List<IPEndPoint>(hostCooldownUntil.Keys))
+        {
+            if (hostCooldownUntil[ep] <= nowTimestamp)
+                hostCooldownUntil.Remove(ep);
+        }
+
+        foreach (var ep in new List<IPAddress>(ipBlockedUntil.Keys))
+        {
+            if (ipBlockedUntil[ep] <= nowTimestamp)
+                ipBlockedUntil.Remove(ep);
+        }
+
+        // emergency cleaners to keep server ram and cpu usage down
+        RelaySettings.TrimIfTooLarge(hostRejectedCounter);
+        RelaySettings.TrimIfTooLarge(ipBlockedUntil);
+        RelaySettings.TrimIfTooLarge(hostCooldownUntil);
     }
 }
