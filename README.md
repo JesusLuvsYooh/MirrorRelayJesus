@@ -14,11 +14,10 @@ UDP multi client relay with host registry and limiters, for Mirror Netcode.
 - Sending signed keep alive heartbeats
 - Notifying the relay when player count or other settings change
 
-// RelayServer.cs
+// RelayServer.cs RelayServerHost.cs RelayServerClient.cs
 - UDP relay that accepts client connections
 - Routes clients to registered hosts
-- Applies rate limiting, cooldowns, and abuse prevention
-- Provides stats for a live (development/editor) dashboard
+- Applies rate limiting, cooldowns, and abuse prevention]
 
 // RelayServerUI.cs
 - Visual debug dashboard for the UDP relay.

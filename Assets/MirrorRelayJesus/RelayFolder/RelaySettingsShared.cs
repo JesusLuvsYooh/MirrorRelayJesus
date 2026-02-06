@@ -7,10 +7,10 @@ using UnityEngine;
 
 public class RelaySettingsShared : MonoBehaviour
 {
-    static public ushort relayPort = 9000; //Relay UDP/KCP port, listens for clients
+    static public ushort relayClientPort = 7778; //Relay UDP/KCP port, listens for clients /9000
     static public ushort hostRegisterPort = 9001;   // port for host registry data //relayRegisteryPort
 
-    static public bool useTokenAuth = true; //Send a pre-connection authentication token to the relay, flags IP as allowed for X time
+    static public bool useTokenAuth = false; //Send a pre-connection authentication token to the relay, flags IP as allowed for X time
     static public string tokenSecret = "MY_SECRET_TOKEN"; // for relay auth
 
     //for hosts encypted registry data, could be sent via website or user account specific

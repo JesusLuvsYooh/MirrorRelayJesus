@@ -30,7 +30,7 @@ public class RelayKcpTransport : KcpTransport
                 // Fire-and-forget UDP message to relay
                 using (UdpClient udp = new UdpClient())
                 {
-                    udp.Connect(RelaySettingsGame.relayAddress, RelaySettingsShared.relayPort);
+                    udp.Connect(RelaySettingsGame.relayAddress, RelaySettingsShared.relayClientPort);
 
                     // Simple auth payload: AUTH|<token>
                     byte[] tokenPayload =
@@ -38,7 +38,7 @@ public class RelayKcpTransport : KcpTransport
 
                     udp.Send(tokenPayload, tokenPayload.Length);
 
-                    RelaySettingsShared.Log($"[Client] Sent AUTH token to relay {RelaySettingsGame.relayAddress}:{RelaySettingsShared.relayPort}");
+                    RelaySettingsShared.Log($"[Client] Sent AUTH token to relay {RelaySettingsGame.relayAddress}:{RelaySettingsShared.relayClientPort}");
                 }
             }
             catch (System.Exception ex)
@@ -49,9 +49,9 @@ public class RelayKcpTransport : KcpTransport
             }
         }
 
-        Port = (ushort)RelaySettingsShared.relayPort;
+        Port = (ushort)RelaySettingsShared.relayClientPort;
 
-        RelaySettingsShared.Log($"[Client] Connecting via relay {RelaySettingsGame.relayAddress}:{RelaySettingsShared.relayPort}");
+        RelaySettingsShared.Log($"[Client] Connecting via relay {RelaySettingsGame.relayAddress}:{RelaySettingsShared.relayClientPort}");
 
         // Connect to relay instead of direct server
         base.ClientConnect(RelaySettingsGame.relayAddress);

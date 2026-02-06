@@ -9,22 +9,24 @@ using System.Security.Cryptography;
 
 public class RelayServerHost
 {
-    private UdpClient hostRegisterListener;
+    public RelayServer relayServer;
+    public UdpClient hostRegisterListener;
     private string payload;
     private double nowTimestamp;
 
-    public Dictionary<string, RegisteredHostInfo> registeredHostInfo = new();
+    public Dictionary<IPEndPoint, RegisteredHostInfo> registeredHostInfo = new();
     private Dictionary<IPEndPoint, double> hostCooldownUntil = new();
     public Dictionary<IPAddress, double> ipBlockedUntil = new();
     private Dictionary<string, int> hostRejectedCounter = new();
 
+    // basic host info, you may need to add your own, such as gamemodes, map, skill level, for matchmaking/host list.
     public struct RegisteredHostInfo
     {
-        public string hostUID;
         public IPEndPoint hostIPEndpoint;
+        public string hostUID; // used for extra security, identify bad users, backup of endpoint as id, for relay use only, not client
         public int hostCurrentPlayers;
         public int hostMaxPlayers;
-        public double hostSecondsSinceSeen;
+        public double hostLastSeen;
     }
 
 
@@ -34,16 +36,42 @@ public class RelayServerHost
         hostRegisterListener.BeginReceive(OnHostRegister, null);
     }
 
+    public void OnHostReceive(IAsyncResult ar,  IPEndPoint clientIPEndPoint) //UdpClient hostSocket,
+    {
+        RelaySettingsShared.Log($"[Relay Host] OnHostReceive called. {clientIPEndPoint}");
+        if (!relayServer.relayServerClient.clientToHostMap.TryGetValue(clientIPEndPoint, out var host))
+        {
+            RelaySettingsShared.LogWarning("[Relay Host] No client to host mapping found.");
+            return;
+        }
+        IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
+        byte[] byteData;
+        try
+        {
+            byteData = host.EndReceive(ar, ref ipEndPoint);
+            //byteData = hostSocket.EndReceive(ar, ref ipEndPoint);
+        }
+        catch
+        {
+            RelaySettingsShared.LogWarning("[Relay Host] Error with data or receiver.");
+            return;
+        }
+
+        relayServer.relayServerClient.clientListener.Send(byteData, byteData.Length, clientIPEndPoint);
+        host.BeginReceive(a => OnHostReceive(a, clientIPEndPoint), null);
+       // hostSocket.BeginReceive(a => OnHostReceive(a, hostSocket, clientIPEndPoint), null);
+    }
+
     void OnHostRegister(IAsyncResult ar)
     {
-        RelaySettingsShared.Log("[Relay] OnHostRegister called.");
+        RelaySettingsShared.Log("[Relay Host] OnHostRegister called.");
 
         IPEndPoint hostIPEndPoint = new IPEndPoint(IPAddress.Any, 0);
         byte[] hostRegisterData = hostRegisterListener.EndReceive(ar, ref hostIPEndPoint);
 
         if (!IsHostAllowed(hostIPEndPoint))
         {
-            //RelaySettingsShared.LogWarning("[Relay] Host rejected.");
+            //RelaySettingsShared.LogWarning("[Relay Host] Host rejected.");
             hostRegisterListener.BeginReceive(OnHostRegister, null);
             return;
         }
@@ -55,12 +83,54 @@ public class RelayServerHost
         }
         catch (Exception e)
         {
-            RelaySettingsShared.LogWarning($"[Relay] Host data tampered with or wrong secret! {e.Message}");
+            RelaySettingsShared.LogWarning($"[Relay Host] Host data tampered with or wrong secret! {e.Message}");
+            hostRegisterListener.BeginReceive(OnHostRegister, null);
+            return;
         }
 
         nowTimestamp = RelaySettingsShared.nowTimestamp();
 
         hostCooldownUntil[hostIPEndPoint] = nowTimestamp + RelaySettings.hostCooldownAmount;
+
+
+        // string split
+        // split length and content checkers
+        // apply max players overwrite, requires split
+        // hostRegisterVerifyTimeout, requires split
+        // see if heartbeat or register, requires split
+        // ignore heartbeat if register info already removed from timeouts?
+
+        if (registeredHostInfo.ContainsKey(hostIPEndPoint))
+        {
+            // update existing host
+            if (registeredHostInfo.TryGetValue(hostIPEndPoint, out var existingHostInfo))
+            {
+                existingHostInfo.hostLastSeen = nowTimestamp;
+                registeredHostInfo[hostIPEndPoint] = existingHostInfo;
+            }
+            //hostMaxPlayers[hostId] = Mathf.Clamp(maxPlayers, 0, maxPlayersPerHostOverride);
+        }
+        else
+        {
+            // Enforce relay host capacity (only for NEW hosts)
+            if (registeredHostInfo.Count >= RelaySettings.maxRegisteredHosts)
+            {
+                RelaySettingsShared.LogWarning($"[Relay Host] Host registry full, rejecting host {hostIPEndPoint}");
+                hostRegisterListener.BeginReceive(OnHostRegister, null);
+                return;
+            }
+            // add new host
+            RegisteredHostInfo newHostInfo = new RegisteredHostInfo
+            {
+                hostIPEndpoint = new IPEndPoint(hostIPEndPoint.Address, 9000),// hostIPEndPoint,
+                hostUID = "uid",
+                hostCurrentPlayers = 0,
+                hostMaxPlayers = 0,
+                hostLastSeen = nowTimestamp
+            };
+            registeredHostInfo.Add(hostIPEndPoint, newHostInfo);
+            RelaySettingsShared.LogWarning($"[Relay Host] New registered host: {hostIPEndPoint}");
+        }
 
         hostRegisterListener.BeginReceive(OnHostRegister, null);
     }
@@ -72,7 +142,7 @@ public class RelayServerHost
 
         if (ipBlockedUntil.TryGetValue(_IPEndPoint.Address, out var untilIp) && nowTimestamp < untilIp)
         {
-            RelaySettingsShared.LogWarning($"[Relay] IP in blocklist: {_IPEndPoint.Address}");
+            RelaySettingsShared.LogWarning($"[Relay Host] IP in blocklist: {_IPEndPoint.Address}");
             return false;
         }
 
@@ -80,7 +150,7 @@ public class RelayServerHost
         // we do address and not address+port/endpoint, for extra security, take no prisoners (from experience)
         if (hostRejectedCounter.ContainsKey(endpoint) && hostRejectedCounter[endpoint] >= RelaySettings.maxHostRejectStrikes)
         {
-            RelaySettingsShared.LogWarning($"[Relay] Host {endpoint} rejected more than {RelaySettings.maxHostRejectStrikes} times, add to blocklist!");
+            RelaySettingsShared.LogWarning($"[Relay Host] Host {endpoint} rejected more than {RelaySettings.maxHostRejectStrikes} times, add to blocklist!");
             ipBlockedUntil[_IPEndPoint.Address] = nowTimestamp + RelaySettings.hostBlocklistDuration;
             hostRejectedCounter.Remove(endpoint); // remove host counter if host now in blocklist
             return false;
@@ -92,7 +162,7 @@ public class RelayServerHost
         {
             hostRejectedCounter.TryAdd(endpoint, 0);   // create entry if it doesn't exist
             hostRejectedCounter[endpoint]++;          // increment
-            RelaySettingsShared.LogWarning($"[Relay] Host register data too frequent, ignore! {_IPEndPoint}");
+            RelaySettingsShared.LogWarning($"[Relay Host] Host register data too frequent, ignore! {_IPEndPoint}");
             return false;
         }
 
@@ -101,7 +171,7 @@ public class RelayServerHost
 
     public void Cleanup()
     {
-        //RelaySettingsShared.LogWarning($"[Relay] Cleanup!");
+        //RelaySettingsShared.LogWarning($"[Relay Host] Cleanup!");
 
         nowTimestamp = RelaySettingsShared.nowTimestamp();
 
@@ -116,6 +186,17 @@ public class RelayServerHost
         {
             if (ipBlockedUntil[ep] <= nowTimestamp)
                 ipBlockedUntil.Remove(ep);
+        }
+
+        foreach (var ep in new List<IPEndPoint>(registeredHostInfo.Keys))
+        {
+            if (registeredHostInfo.TryGetValue(ep, out RegisteredHostInfo info))
+            {
+                if (nowTimestamp - info.hostLastSeen > RelaySettings.hostLastSeenTimeout)
+                {
+                    registeredHostInfo.Remove(ep);
+                }
+            }
         }
 
         // emergency cleaners to keep server ram and cpu usage down

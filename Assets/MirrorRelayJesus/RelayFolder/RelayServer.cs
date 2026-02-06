@@ -35,7 +35,10 @@ public class RelayServer : MonoBehaviour
         Application.targetFrameRate = RelaySettings.frameRate;
 
         // manually call setup as Start does not auto run on those scripts
+        relayServerHost.relayServer = this;
         relayServerHost.Setup();
+        relayServerClient.relayServer = this;
+        relayServerClient.Setup();
 
         InvokeRepeating(nameof(Repeater), 1.0f, 1.0f);
     }
@@ -44,5 +47,25 @@ public class RelayServer : MonoBehaviour
     void Repeater()
     {
         relayServerHost.Cleanup();
+    }
+
+    void OnApplicationQuit()
+    {
+        if (relayServerHost.hostRegisterListener != null)
+        {
+            relayServerHost.hostRegisterListener.Close();
+            relayServerHost.hostRegisterListener.Dispose();
+            relayServerHost.hostRegisterListener = null;
+        }
+        if (relayServerClient.clientListener != null)
+        {
+            relayServerClient.clientListener.Close();
+            relayServerClient.clientListener.Dispose();
+            relayServerClient.clientListener = null;
+        }
+        foreach (var host in relayServerClient.clientToHostMap.Values)
+        {
+            host?.Close();
+        }
     }
 }

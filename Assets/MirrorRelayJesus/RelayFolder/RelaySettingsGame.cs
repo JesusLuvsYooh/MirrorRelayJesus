@@ -9,7 +9,7 @@ public class RelaySettingsGame : MonoBehaviour
 
     // Relay IP or hostname
     static public string relayAddress = "127.0.0.1";
-    static public ushort gamePort = 7777;    // Mirror/KCP listen port, the in-game network manager/transport port
+    static public ushort gamePort = 9000;    // Mirror/KCP listen port, the in-game network manager/transport port //7777
 
     //static public string hostID = "HostA"; // Unique per host instance
 

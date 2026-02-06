@@ -24,9 +24,9 @@ public class RelaySettings : MonoBehaviour
     static public float ipBlacklistDuration = 86400; 
     static public float clientTimeout = 15f;
 
-    static public float hostTimeout = 15f;
+    static public float hostLastSeenTimeout = 15f; // remove host if no heartbeat, should be higher value than hosts heartbeatInterval
     static public float hostRegisterVerifyTimeout = 30f;
-    static public int maxPlayersPerHostOverwrite = 200;
+    static public int maxPlayersPerHostOverride = 100; // to prevent hosts allowing more connections in than we want, cant trust their sent variable to be honest
 
     static public int maxHostRejectStrikes = 3;
     static public int hostBlocklistDuration = 86400; // 86400 = 24h
