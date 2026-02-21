@@ -464,11 +464,11 @@ MonoBehaviour:
   syncDirection: 1
   syncMode: 0
   syncInterval: 0.05
-  updateMethod: 0
   target: {fileID: 4659514702152478195}
+  updateMethod: 0
   syncPosition: 1
   syncRotation: 1
-  syncScale: 0
+  syncScale: 1
   onlySyncOnChange: 1
   compressRotation: 1
   interpolatePosition: 1
@@ -500,7 +500,8 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   characterController: {fileID: 1014105431373575527}
-  ControllerUIPrefab: {fileID: 644766297742565710, guid: 7beee247444994f0281dadde274cc4af, type: 3}
+  ControllerUIPrefab: {fileID: 644766297742565710, guid: 7beee247444994f0281dadde274cc4af,
+    type: 3}
   moveKeys:
     Forward: 119
     Back: 115

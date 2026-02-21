@@ -96,7 +96,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000000, guid: 7dde303f10b9fde4fae4878d2c9f360f, type: 2}
+  m_LightingDataAsset: {fileID: 112000000, guid: 7dde303f10b9fde4fae4878d2c9f360f,
+    type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -270,8 +271,8 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  updateMethod: 1
   target: {fileID: 856494741}
+  updateMethod: 1
   syncPosition: 1
   syncRotation: 1
   syncScale: 0
@@ -882,20 +883,21 @@ MonoBehaviour:
   sendRate: 60
   unreliableBaselineRate: 1
   unreliableRedundancy: 0
-  offlineScene: 
-  onlineScene: 
-  offlineSceneLoadDelay: 0
   transport: {fileID: 2126814504}
   networkAddress: localhost
   maxConnections: 100
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
+  exceptionsDisconnect: 1
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 7197623925735895267, guid: 26433cf84d806564491a56c685a18f82, type: 3}
+  offlineScene: 
+  onlineScene: 
+  offlineSceneLoadDelay: 0
+  playerPrefab: {fileID: 7863680369626900553, guid: f9534c78c5208a04a993c69840315287,
+    type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 1
   spawnPrefabs: []
-  exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
     bufferLimit: 32
