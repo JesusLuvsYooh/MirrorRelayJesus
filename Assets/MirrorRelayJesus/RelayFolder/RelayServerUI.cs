@@ -56,7 +56,9 @@ public class RelayServerUI : MonoBehaviour
     void DrawRelay()
     {
         GUILayout.Label("=== Relay ===", GUI.skin.box);
-        GUILayout.Label($"Registered Hosts: {relayServer.relayServerHost.registeredHostInfo.Count}");
+        GUILayout.Label($"Hosts: {relayServer.relayServerHost.registeredHostInfo.Count} / {RelaySettings.maxRegisteredHosts}");
+        GUILayout.Label($"Clients: {relayServer.relayServerClient.clientToHostMap.Count} / {RelaySettings.maxRelayClients}");
+
         GUILayout.Label($"Blocked IPs: {relayServer.relayServerHost.ipBlockedUntil.Count}");
     }
 

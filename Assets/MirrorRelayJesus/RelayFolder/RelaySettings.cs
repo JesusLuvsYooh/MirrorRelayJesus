@@ -22,7 +22,7 @@ public class RelaySettings : MonoBehaviour
     static public int maxPacketsPerSecondPerIp = 60;
     // 24h, ip block, not endpoint, this is quite strict and may block legit people in a bad network, however also feel free to set it to increase value if people abuse default cooldown 
     static public float ipBlacklistDuration = 86400; 
-    static public float clientTimeout = 15f;
+    static public float clientLastSeenTimeout = 15f;
 
     static public float hostLastSeenTimeout = 15f; // remove host if no heartbeat, should be higher value than hosts heartbeatInterval
     static public float hostRegisterVerifyTimeout = 30f;

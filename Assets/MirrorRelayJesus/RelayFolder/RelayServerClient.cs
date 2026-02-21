@@ -15,6 +15,7 @@ public class RelayServerClient
     private double nowTimestamp;
     private static readonly System.Random randomValue = new();
     public Dictionary<IPEndPoint, UdpClient> clientToHostMap = new();
+    private Dictionary<IPEndPoint, double> clientLastSeen = new();
 
     public void Setup()
     {
@@ -41,7 +42,43 @@ public class RelayServerClient
 
         }
 
+        nowTimestamp = RelaySettingsShared.nowTimestamp();
+        clientLastSeen[clientIPEndPoint] = nowTimestamp;
+
         udpClient.Send(byteData, byteData.Length);
         clientListener.BeginReceive(OnClientReceive, null);
+    }
+
+    public void Cleanup()
+    {
+        //RelaySettingsShared.LogWarning($"[Relay Host] Cleanup!");
+
+        nowTimestamp = RelaySettingsShared.nowTimestamp();
+
+        // remove expired
+        //foreach (var ep in new List<IPEndPoint>(hostCooldownUntil.Keys))
+        //{
+        //    if (hostCooldownUntil[ep] <= nowTimestamp)
+        //        hostCooldownUntil.Remove(ep);
+        //}
+
+        //foreach (var ep in new List<IPAddress>(ipBlockedUntil.Keys))
+        //{
+        //    if (ipBlockedUntil[ep] <= nowTimestamp)
+        //        ipBlockedUntil.Remove(ep);
+        //}
+
+        foreach (var ep in new List<IPEndPoint>(clientLastSeen.Keys))
+        {
+            if (nowTimestamp - clientLastSeen[ep] > RelaySettings.clientLastSeenTimeout)
+            {
+                clientToHostMap.Remove(ep);
+                clientLastSeen.Remove(ep);
+            }
+        }
+
+        // emergency cleaners to keep server ram and cpu usage down
+        //RelaySettings.TrimIfTooLarge(clientLastSeen);
+        //RelaySettings.TrimIfTooLarge(clientToHostMap);
     }
 }

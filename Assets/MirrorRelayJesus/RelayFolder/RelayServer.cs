@@ -47,6 +47,7 @@ public class RelayServer : MonoBehaviour
     void Repeater()
     {
         relayServerHost.Cleanup();
+        relayServerClient.Cleanup();
     }
 
     void OnApplicationQuit()
