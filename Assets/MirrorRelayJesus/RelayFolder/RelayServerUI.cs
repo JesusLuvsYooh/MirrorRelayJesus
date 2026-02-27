@@ -59,7 +59,10 @@ public class RelayServerUI : MonoBehaviour
         GUILayout.Label($"Hosts: {relayServer.relayServerHost.registeredHostInfo.Count} / {RelaySettings.maxRegisteredHosts}");
         GUILayout.Label($"Clients: {relayServer.relayServerClient.clientToHostMap.Count} / {RelaySettings.maxRelayClients}");
 
-        GUILayout.Label($"Blocked IPs: {relayServer.relayServerHost.ipBlockedUntil.Count}");
+        GUILayout.Label($"Blocked Host IPs: {relayServer.relayServerHost.ipBlockedUntil.Count}");
+        GUILayout.Label($"Blocked Client IPs: {relayServer.relayServerClient.ipBlockedUntil.Count}");
+
+        GUILayout.Label($"Total Client strikes: {relayServer.relayServerClient.totalPacketsStrikes}");
     }
 
     void DrawHosts()

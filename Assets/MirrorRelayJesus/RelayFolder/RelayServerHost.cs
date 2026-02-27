@@ -38,7 +38,11 @@ public class RelayServerHost
 
     public void OnHostReceive(IAsyncResult ar,  IPEndPoint clientIPEndPoint) //UdpClient hostSocket,
     {
-        RelaySettingsShared.Log($"[Relay Host] OnHostReceive called. {clientIPEndPoint}");
+        // we shouldnt need to do many host checks, as the register verification should do that
+        // then here we just check if host data is from a registered host
+        // we also use the hosts registration message as the "is still alive"/hostLastSeen tracker, so less calls are made here where it could get busy
+
+        //RelaySettingsShared.Log($"[Relay Host] OnHostReceive called. {clientIPEndPoint}");
         if (!relayServer.relayServerClient.clientToHostMap.TryGetValue(clientIPEndPoint, out var host))
         {
             RelaySettingsShared.LogWarning("[Relay Host] No client to host mapping found.");
@@ -64,10 +68,9 @@ public class RelayServerHost
 
     void OnHostRegister(IAsyncResult ar)
     {
-        RelaySettingsShared.Log("[Relay Host] OnHostRegister called.");
-
         IPEndPoint hostIPEndPoint = new IPEndPoint(IPAddress.Any, 0);
         byte[] hostRegisterData = hostRegisterListener.EndReceive(ar, ref hostIPEndPoint);
+        //RelaySettingsShared.Log($"[Relay Host] OnHostRegister called. {hostIPEndPoint}");
 
         if (!IsHostAllowed(hostIPEndPoint))
         {
@@ -75,7 +78,7 @@ public class RelayServerHost
             hostRegisterListener.BeginReceive(OnHostRegister, null);
             return;
         }
-
+        
         payload = Encoding.UTF8.GetString(hostRegisterData);
         try
         {
@@ -135,34 +138,34 @@ public class RelayServerHost
         hostRegisterListener.BeginReceive(OnHostRegister, null);
     }
 
-    bool IsHostAllowed(IPEndPoint _IPEndPoint)
+    bool IsHostAllowed(IPEndPoint ipEndPoint)
     {
-        string endpoint = _IPEndPoint.ToString();
+        string endpointString = ipEndPoint.ToString();
         nowTimestamp = RelaySettingsShared.nowTimestamp();
 
-        if (ipBlockedUntil.TryGetValue(_IPEndPoint.Address, out var untilIp) && nowTimestamp < untilIp)
+        if (ipBlockedUntil.TryGetValue(ipEndPoint.Address, out var untilIp) && nowTimestamp < untilIp)
         {
-            RelaySettingsShared.LogWarning($"[Relay Host] IP in blocklist: {_IPEndPoint.Address}");
+            RelaySettingsShared.LogWarning($"[Relay Host] IP in blocklist: {ipEndPoint.Address}");
             return false;
         }
 
         // add host to an ip blocklist if malacious counter is trigger X times
         // we do address and not address+port/endpoint, for extra security, take no prisoners (from experience)
-        if (hostRejectedCounter.ContainsKey(endpoint) && hostRejectedCounter[endpoint] >= RelaySettings.maxHostRejectStrikes)
+        if (hostRejectedCounter.ContainsKey(endpointString) && hostRejectedCounter[endpointString] >= RelaySettings.maxHostRejectStrikes)
         {
-            RelaySettingsShared.LogWarning($"[Relay Host] Host {endpoint} rejected more than {RelaySettings.maxHostRejectStrikes} times, add to blocklist!");
-            ipBlockedUntil[_IPEndPoint.Address] = nowTimestamp + RelaySettings.hostBlocklistDuration;
-            hostRejectedCounter.Remove(endpoint); // remove host counter if host now in blocklist
+            RelaySettingsShared.LogWarning($"[Relay Host] Host {endpointString} rejected more than {RelaySettings.maxHostRejectStrikes} times, add to blocklist!");
+            ipBlockedUntil[ipEndPoint.Address] = nowTimestamp + RelaySettings.hostBlocklistDuration;
+            hostRejectedCounter.Remove(endpointString); // remove host counter if host now in blocklist
             return false;
         }
 
         // device or network lag may make host register send/arrive closer together than expected
         // and not necessary malacious, a counter should trigger a block if repeated
-        if (hostCooldownUntil.TryGetValue(_IPEndPoint, out var until) && nowTimestamp < until)
+        if (hostCooldownUntil.TryGetValue(ipEndPoint, out var until) && nowTimestamp < until)
         {
-            hostRejectedCounter.TryAdd(endpoint, 0);   // create entry if it doesn't exist
-            hostRejectedCounter[endpoint]++;          // increment
-            RelaySettingsShared.LogWarning($"[Relay Host] Host register data too frequent, ignore! {_IPEndPoint}");
+            hostRejectedCounter.TryAdd(endpointString, 0);   // create entry if it doesn't exist
+            hostRejectedCounter[endpointString]++;          // increment
+            RelaySettingsShared.LogWarning($"[Relay Host] Host register data too frequent, ignore! {ipEndPoint}");
             return false;
         }
 

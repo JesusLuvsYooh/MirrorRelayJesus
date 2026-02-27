@@ -17,18 +17,20 @@ public class RelaySettings : MonoBehaviour
     static public float handshakeTimeout = 3f;
 
     [Header("Rate Limiting")]
-    // higher dicts require more ram, eventually could slow down code lookups too, trims whilst leaveing 10% of old dict values
+    // higher dicts require more ram, eventually could slow down code lookups too, trims whilst leaveing 10% of old dict values, so newly added data does not get wiped.
     static public int trimDictionaryAtAmount = 1000;
-    static public int maxPacketsPerSecondPerIp = 60;
+    static public int maxPacketsPerSecondPerClient = 180; // block if clients potentially abusing sends, network/cpu lag could trigger too, so use strike system, chatgpt recomended SendRate*3, mirror packets do not align to sendrate.
+    static public int maxClientStrikes = 3; // each strike is a 1 second check that receieved too much data, over the entire client gameplay connection, 3 strikes (might be too strict)
     // 24h, ip block, not endpoint, this is quite strict and may block legit people in a bad network, however also feel free to set it to increase value if people abuse default cooldown 
-    static public float ipBlacklistDuration = 86400; 
-    static public float clientLastSeenTimeout = 15f;
+    static public float clientBlocklistDuration = 86400; // 86400 = 24h
+    static public float clientLastSeenTimeout = 15f; // remove client if no message received since last seen
 
     static public float hostLastSeenTimeout = 15f; // remove host if no heartbeat, should be higher value than hosts heartbeatInterval
     static public float hostRegisterVerifyTimeout = 30f;
     static public int maxPlayersPerHostOverride = 100; // to prevent hosts allowing more connections in than we want, cant trust their sent variable to be honest
 
     static public int maxHostRejectStrikes = 3;
+    
     static public int hostBlocklistDuration = 86400; // 86400 = 24h
 
     static public float authGraceWindow = 5f;
