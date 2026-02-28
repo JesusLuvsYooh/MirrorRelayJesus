@@ -21,6 +21,7 @@ public class RelayGame : MonoBehaviour
     private float lastHeartbeatTime = -999f;
     private string hostUID;
     private string payload;
+    private string countryCode;
 
     /// Sets the KCP transport port so the relay knows where to forward traffic.
     void Awake()
@@ -42,6 +43,10 @@ public class RelayGame : MonoBehaviour
             hostUID = new Guid().ToString();
             //save/load in player prefs so its same everytime?
         }
+
+        // so we can pair players and hosts together, and give them minimal ping/latency for maximum player experience
+        string countryCode = RelayCountryDetector.DetectCountryCode();
+        print("Country Code: " + countryCode);
     }
 
     public void OnServerStarted()

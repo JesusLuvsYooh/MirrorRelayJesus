@@ -32,6 +32,15 @@ public class RelayServerHost
     public List<RegisteredHostInfo> GetHostList()
     {
         return new List<RegisteredHostInfo>(registeredHostInfo.Values);
+        //List<RegisteredHostInfo> hostList =
+        //registeredHostInfo.Values
+        //    .OrderByDescending(h => h.hostCurrentPlayers)
+        //    .ToList();
+
+    //    var filtered =
+    //registeredHostInfo.Values
+    //    .Where(h => h.hostCurrentPlayers < h.hostMaxPlayers)
+    //    .ToList();
     }
 
 
