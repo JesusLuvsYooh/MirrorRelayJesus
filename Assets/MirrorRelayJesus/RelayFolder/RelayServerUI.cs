@@ -68,11 +68,44 @@ public class RelayServerUI : MonoBehaviour
     void DrawHosts()
     {
         GUILayout.Label("=== Hosts ===", GUI.skin.box);
+
+        var hostList = relayServer.relayServerHost.GetHostList();
+        if (hostList.Count == 0)
+        {
+            GUILayout.Label("No registered hosts.");
+            return;
+        }
+
+        foreach (var host in hostList)
+        {
+            GUILayout.BeginVertical("box");
+
+            GUILayout.Label($"Host UID: {host.hostUID}");
+            GUILayout.Label($"Endpoint: {host.hostIPEndpoint}");
+            GUILayout.Label($"Players: {host.hostCurrentPlayers} / {host.hostMaxPlayers}");
+            GUILayout.Label($"Last seen: {host.hostLastSeen}");
+
+            GUILayout.EndVertical();
+        }
     }
 
     void DrawClients()
     {
         GUILayout.Label("=== Clients ===", GUI.skin.box);
+
+        var clients = relayServer.relayServerClient.ClientList();
+        if (clients.Count == 0)
+        {
+            GUILayout.Label("No connected clients.");
+            return;
+        }
+
+        foreach (var key in clients)
+        {
+            GUILayout.BeginVertical("box");
+            GUILayout.Label($"Endpoint: {key}");
+            GUILayout.EndVertical();
+        }
     }
 
 #endif

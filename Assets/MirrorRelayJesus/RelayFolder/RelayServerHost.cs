@@ -29,6 +29,11 @@ public class RelayServerHost
         public double hostLastSeen;
     }
 
+    public List<RegisteredHostInfo> GetHostList()
+    {
+        return new List<RegisteredHostInfo>(registeredHostInfo.Values);
+    }
+
 
     public void Setup()
     {

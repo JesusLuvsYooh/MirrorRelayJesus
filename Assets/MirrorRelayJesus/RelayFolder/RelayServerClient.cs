@@ -22,7 +22,7 @@ public class RelayServerClient
     private Dictionary<IPEndPoint, int> clientPacketCount = new();
     private Dictionary<IPEndPoint, double> clientWindowStart = new();
     Dictionary<IPEndPoint, bool> clientStruckThisWindow = new();
-    Dictionary<IPEndPoint, double> clientLastPpsLogTime = new();
+    public List<IPEndPoint> ClientList() => new List<IPEndPoint>(clientToHostMap.Keys);
 
     public int totalPacketsStrikes;
 
@@ -139,19 +139,6 @@ public class RelayServerClient
 
         nowTimestamp = RelaySettingsShared.nowTimestamp();
 
-        // remove expired
-        //foreach (var ep in new List<IPEndPoint>(hostCooldownUntil.Keys))
-        //{
-        //    if (hostCooldownUntil[ep] <= nowTimestamp)
-        //        hostCooldownUntil.Remove(ep);
-        //}
-
-        //foreach (var ep in new List<IPAddress>(ipBlockedUntil.Keys))
-        //{
-        //    if (ipBlockedUntil[ep] <= nowTimestamp)
-        //        ipBlockedUntil.Remove(ep);
-        //}
-
         foreach (var ep in new List<IPEndPoint>(clientLastSeen.Keys))
         {
             if (nowTimestamp - clientLastSeen[ep] > RelaySettings.clientLastSeenTimeout)
@@ -166,8 +153,12 @@ public class RelayServerClient
         RelaySettings.TrimIfTooLarge(ipBlockedUntil);
         RelaySettings.TrimIfTooLarge(clientCooldownUntil);
 
-        // we should not need these, client limit and timeouts should remove them naturally before dictionary gets too big
-        //RelaySettings.TrimIfTooLarge(clientLastSeen); 
-        //RelaySettings.TrimIfTooLarge(clientToHostMap);
-    }
+        RelaySettings.TrimIfTooLarge(clientPacketCount);
+        RelaySettings.TrimIfTooLarge(clientWindowStart);
+        RelaySettings.TrimIfTooLarge(clientStruckThisWindow);
+
+    // we should not need these, client limit and timeouts should remove them naturally before dictionary gets too big
+    //RelaySettings.TrimIfTooLarge(clientLastSeen); 
+    //RelaySettings.TrimIfTooLarge(clientToHostMap);
+}
 }
