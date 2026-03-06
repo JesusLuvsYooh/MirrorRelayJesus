@@ -17,11 +17,46 @@ using kcp2k;
 public class RelayGame : MonoBehaviour
 {
     private UdpClient udp;
-    private bool hostRegistered;
+    private bool hostRegistered; // if registration data changes, reset this, heartbeats to keep alive, not update database
     private float lastHeartbeatTime = -999f;
-    private string hostUID;
+    //private string hostUID;
     private string payload;
-    private string countryCode;
+    //private string countryCode;
+
+    public long hostTimestamp = 0;
+    // public IPEndPoint hostIPEndpoint;
+    public string hostUID = ""; // used for extra security, identify bad users, backup of endpoint as id, for relay use only, not client
+    public short hostCurrentPlayers = 0;
+    public short hostMaxPlayers = 0;
+    // public double hostLastSeen;
+    public string hostCountryCode = "";
+    public short hostPort = 0;
+    public float hostVersion = 0;
+    public string hostExtras = "";
+
+    //[System.Serializable]
+    //public class HostRegisterPayload
+    //{
+    //    public string hostId;
+    //    public int gamePort;
+    //    public int maxPlayers;
+    //    public string extrasJson;
+    //    public long timestamp;
+    //}
+
+    //public struct RegisteredHostInfo
+    //{
+    //    public long hostTimestamp;
+    //    // public IPEndPoint hostIPEndpoint;
+    //    public string hostUID; // used for extra security, identify bad users, backup of endpoint as id, for relay use only, not client
+    //    public short hostCurrentPlayers;
+    //    public short hostMaxPlayers;
+    //   // public double hostLastSeen;
+    //    public string hostCountryCode;
+    //    public short hostPort;
+    //    public float hostVersion;
+    //    public string hostExtras;
+    //}
 
     /// Sets the KCP transport port so the relay knows where to forward traffic.
     void Awake()
@@ -45,8 +80,8 @@ public class RelayGame : MonoBehaviour
         }
 
         // so we can pair players and hosts together, and give them minimal ping/latency for maximum player experience
-        string countryCode = RelayCountryDetector.DetectCountryCode();
-        print("Country Code: " + countryCode);
+        hostCountryCode = RelayCountryDetector.DetectCountryCode();
+       // print("Country Code: " + hostCountryCode);
     }
 
     public void OnServerStarted()
@@ -88,7 +123,9 @@ public class RelayGame : MonoBehaviour
             payload = "HEARTBEAT|";
         }
 
-        payload += $"{hostUID}|{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}|{RelaySettingsGame.gamePort}|{RelaySettingsGame.maxPlayers}";
+       // payload += $"{hostUID}|{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}|{RelaySettingsGame.gamePort}|{RelaySettingsGame.maxPlayers}";
+        payload = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + "|" + hostUID + "|" + hostCurrentPlayers + "|" + RelaySettingsGame.maxPlayers + "|" + hostCountryCode + "|" + RelaySettingsGame.gamePort + "|" + hostVersion + "|" + hostExtras;
+       // REGISTER | FEE00F36 - 8151 - 5001 - AC38 - AB6242AA1B6F | 1772788967 | 7777 | 8
         payload = RelaySettingsShared.Encrypt(payload, RelaySettingsShared.hostRegisterSecret);
         Send(payload);
 

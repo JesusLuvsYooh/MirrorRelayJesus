@@ -83,8 +83,10 @@ public class RelayServerUI : MonoBehaviour
             GUILayout.Label($"Host UID: {host.hostUID}");
             GUILayout.Label($"Endpoint: {host.hostIPEndpoint}");
             GUILayout.Label($"Players: {host.hostCurrentPlayers} / {host.hostMaxPlayers}");
-            GUILayout.Label($"Last seen: {host.hostLastSeen}");
-
+            //GUILayout.Label($"Last seen: {host.hostLastSeen}"); // needs calculation for readable UI
+            GUILayout.Label($"Country: {host.hostCountryCode}");
+            GUILayout.Label($"Port: {host.hostPort}");
+            GUILayout.Label($"Version: {host.hostVersion}");
             GUILayout.EndVertical();
         }
     }

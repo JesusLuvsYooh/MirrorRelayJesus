@@ -6,6 +6,8 @@ using System.Text;
 using System;
 using System.Collections;
 using System.Security.Cryptography;
+using static RelayServerHost;
+using System.Linq;
 
 public class RelayServerClient
 {
@@ -47,17 +49,52 @@ public class RelayServerClient
 
 
 
+        //if (!clientToHostMap.TryGetValue(ipEndPoint, out var udpClient))
+        //{
+        //    udpClient = new UdpClient();
+        //    var keys = new List<IPEndPoint>(relayServer.relayServerHost.registeredHostInfo.Keys);
+        //    IPEndPoint randomEndpoint = keys[randomValue.Next(keys.Count)];
+        //    RelaySettingsShared.Log($"[Relay Client] Connect to random host: {randomEndpoint}");
+        //    udpClient.Connect(new IPEndPoint(randomEndpoint.Address, 7777));
+        //   // udpClient.Connect("localhost", 9000);
+        //    udpClient.BeginReceive(a => relayServer.relayServerHost.OnHostReceive(a, ipEndPoint), null);
+        //    clientToHostMap[ipEndPoint] = udpClient;
+
+        //}
+
         if (!clientToHostMap.TryGetValue(ipEndPoint, out var udpClient))
         {
             udpClient = new UdpClient();
-            var keys = new List<IPEndPoint>(relayServer.relayServerHost.registeredHostInfo.Keys);
-            IPEndPoint randomEndpoint = keys[randomValue.Next(keys.Count)];
-            RelaySettingsShared.Log($"[Relay Client] Connect to random host: {randomEndpoint}");
-            udpClient.Connect(new IPEndPoint(randomEndpoint.Address, 7777));
-           // udpClient.Connect("localhost", 9000);
+            // var hosts = new List<RegisteredHostInfo>(relayServer.relayServerHost.registeredHostInfo.Values);
+            //Slightly faster version(no ToList allocation) If you want to avoid allocations:
+
+var availableHosts = relayServer.relayServerHost.registeredHostInfo.Values
+    .Where(h => h.hostCurrentPlayers < h.hostMaxPlayers);
+
+            int count = availableHosts.Count();
+            if (count == 0)
+            {
+                RelaySettingsShared.LogWarning("[Relay Client] No available hosts.");
+                return;
+            }
+            RegisteredHostInfo randomHost =
+                availableHosts.ElementAt(randomValue.Next(count));
+
+    //        var hosts = relayServer.relayServerHost.registeredHostInfo.Values
+    //.Where(h => h.hostCurrentPlayers < h.hostMaxPlayers)
+    //.ToList();
+    //        if (hosts.Count == 0)
+    //        {
+    //            RelaySettingsShared.LogWarning("[Relay Client] No hosts available.");
+    //            return;
+    //        }
+    //        RegisteredHostInfo randomHost = hosts[randomValue.Next(hosts.Count)];
+
+            RelaySettingsShared.Log($"[Relay Client] Connect to random host: {randomHost.hostIPEndpoint}/{randomHost.hostPort}");
+
+            udpClient.Connect(new IPEndPoint(randomHost.hostIPEndpoint.Address, randomHost.hostPort));
             udpClient.BeginReceive(a => relayServer.relayServerHost.OnHostReceive(a, ipEndPoint), null);
             clientToHostMap[ipEndPoint] = udpClient;
-
         }
 
         nowTimestamp = RelaySettingsShared.nowTimestamp();

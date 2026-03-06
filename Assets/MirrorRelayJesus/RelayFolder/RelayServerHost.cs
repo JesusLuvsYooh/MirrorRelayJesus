@@ -24,9 +24,13 @@ public class RelayServerHost
     {
         public IPEndPoint hostIPEndpoint;
         public string hostUID; // used for extra security, identify bad users, backup of endpoint as id, for relay use only, not client
-        public int hostCurrentPlayers;
-        public int hostMaxPlayers;
+        public short hostCurrentPlayers;
+        public short hostMaxPlayers;
         public double hostLastSeen;
+        public string hostCountryCode;
+        public short hostPort;
+        public float hostVersion;
+        public string hostExtras;
     }
 
     public List<RegisteredHostInfo> GetHostList()
@@ -42,7 +46,6 @@ public class RelayServerHost
     //    .Where(h => h.hostCurrentPlayers < h.hostMaxPlayers)
     //    .ToList();
     }
-
 
     public void Setup()
     {
@@ -94,6 +97,7 @@ public class RelayServerHost
         }
         
         payload = Encoding.UTF8.GetString(hostRegisterData);
+        
         try
         {
             payload = RelaySettingsShared.Decrypt(payload, RelaySettingsShared.hostRegisterSecret);
@@ -104,7 +108,7 @@ public class RelayServerHost
             hostRegisterListener.BeginReceive(OnHostRegister, null);
             return;
         }
-
+        RelaySettingsShared.LogWarning($"[Relay Host] payload: {payload}");
         nowTimestamp = RelaySettingsShared.nowTimestamp();
 
         hostCooldownUntil[hostIPEndPoint] = nowTimestamp + RelaySettings.hostCooldownAmount;
@@ -136,17 +140,33 @@ public class RelayServerHost
                 hostRegisterListener.BeginReceive(OnHostRegister, null);
                 return;
             }
+
+            var parts = payload.Split('|');
+            if (parts.Length < 7) // may change, but we know if less than this, something has gone wrong
+            {
+                RelaySettingsShared.LogWarning($"[Relay Host] Invalid host registry data: {parts.Length}");
+                hostRegisterListener.BeginReceive(OnHostRegister, null);
+                return;
+            }
+
+           // register | DateTimeOffset.UtcNow.ToUnixTimeSeconds() + "|" + hostUID + "|" + hostCurrentPlayers + "|" + RelaySettingsGame.maxPlayers + "|" + hostCountryCode + "|" + RelaySettingsGame.gamePort + "|" + hostVersion + "|" + hostExtras;
+
+
             // add new host
             RegisteredHostInfo newHostInfo = new RegisteredHostInfo
             {
-                hostIPEndpoint = new IPEndPoint(hostIPEndPoint.Address, 9000),// hostIPEndPoint,
-                hostUID = "uid",
-                hostCurrentPlayers = 0,
-                hostMaxPlayers = 0,
-                hostLastSeen = nowTimestamp
+                hostIPEndpoint = hostIPEndPoint,// hostIPEndPoint, new IPEndPoint(hostIPEndPoint.Address, 9000)
+                hostUID = parts[2],
+                hostCurrentPlayers = short.Parse(parts[2]),
+                hostMaxPlayers = short.Parse(parts[3]),
+                hostLastSeen = nowTimestamp,
+                hostCountryCode = parts[4],
+                hostPort = short.Parse(parts[5]),
+                hostVersion = short.Parse(parts[6]),
+                hostExtras = parts[7]
             };
             registeredHostInfo.Add(hostIPEndPoint, newHostInfo);
-            RelaySettingsShared.LogWarning($"[Relay Host] New registered host: {hostIPEndPoint}");
+            RelaySettingsShared.LogWarning($"[Relay Host] New host: {hostIPEndPoint} Port: {parts[5]} Country: {parts[4]}");
         }
 
         hostRegisterListener.BeginReceive(OnHostRegister, null);
