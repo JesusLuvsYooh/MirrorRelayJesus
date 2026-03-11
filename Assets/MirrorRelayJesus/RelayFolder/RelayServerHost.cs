@@ -88,6 +88,12 @@ public class RelayServerHost
         IPEndPoint hostIPEndPoint = new IPEndPoint(IPAddress.Any, 0);
         byte[] hostRegisterData = hostRegisterListener.EndReceive(ar, ref hostIPEndPoint);
         //RelaySettingsShared.Log($"[Relay Host] OnHostRegister called. {hostIPEndPoint}");
+        if (hostRegisterData == null || hostRegisterData.Length < 6 || hostRegisterData.Length > 2048)
+        {
+            RelaySettingsShared.LogWarning($"[Relay] Invalid packet size from {hostIPEndPoint}: {hostRegisterData?.Length}");
+            hostRegisterListener.BeginReceive(OnHostRegister, null);
+            return;
+        }
 
         if (!IsHostAllowed(hostIPEndPoint))
         {
@@ -97,7 +103,14 @@ public class RelayServerHost
         }
         
         payload = Encoding.UTF8.GetString(hostRegisterData);
-        
+
+        if (payload.Length < 10)
+        {
+            RelaySettingsShared.LogWarning($"[Relay Host] Host data missing! {payload}");
+            hostRegisterListener.BeginReceive(OnHostRegister, null);
+            return;
+        }
+
         try
         {
             payload = RelaySettingsShared.Decrypt(payload, RelaySettingsShared.hostRegisterSecret);
@@ -109,8 +122,18 @@ public class RelayServerHost
             return;
         }
         RelaySettingsShared.LogWarning($"[Relay Host] payload: {payload}");
-        nowTimestamp = RelaySettingsShared.nowTimestamp();
 
+
+    //    if (!msg.StartsWith("REGISTER") &&
+    //!msg.StartsWith("CONNECT") &&
+    //!msg.StartsWith("LIST"))
+    //    {
+    //        RelaySettingsShared.LogWarning($"[Relay] Invalid message type from {ipEndPoint}");
+    //        hostRegisterListener.BeginReceive(OnHostRegister, null);
+    //        return;
+    //    }
+
+        nowTimestamp = RelaySettingsShared.nowTimestamp();
         hostCooldownUntil[hostIPEndPoint] = nowTimestamp + RelaySettings.hostCooldownAmount;
 
 
@@ -140,29 +163,36 @@ public class RelayServerHost
                 hostRegisterListener.BeginReceive(OnHostRegister, null);
                 return;
             }
-
             var parts = payload.Split('|');
-            if (parts.Length < 7) // may change, but we know if less than this, something has gone wrong
+            if (parts.Length <= 7) // may change, but we know if less than this, something has gone wrong
             {
                 RelaySettingsShared.LogWarning($"[Relay Host] Invalid host registry data: {parts.Length}");
                 hostRegisterListener.BeginReceive(OnHostRegister, null);
                 return;
             }
+            // register | DateTimeOffset.UtcNow.ToUnixTimeSeconds() + "|" + hostUID + "|" + hostCurrentPlayers + "|" + RelaySettingsGame.maxPlayers + "|" + hostCountryCode + "|" + RelaySettingsGame.gamePort + "|" + hostVersion + "|" + hostExtras;
 
-           // register | DateTimeOffset.UtcNow.ToUnixTimeSeconds() + "|" + hostUID + "|" + hostCurrentPlayers + "|" + RelaySettingsGame.maxPlayers + "|" + hostCountryCode + "|" + RelaySettingsGame.gamePort + "|" + hostVersion + "|" + hostExtras;
-
+            //check data is good
+            if (!short.TryParse(parts[2], out short currentPlayers) ||
+    !short.TryParse(parts[3], out short maxPlayers) ||
+    !short.TryParse(parts[5], out short hostPort) ||
+    !float.TryParse(parts[6], out float hostVersion))
+            {
+                RelaySettingsShared.LogWarning($"[Relay Host] Failed parsing host data: {payload}");
+                return;
+            }
 
             // add new host
             RegisteredHostInfo newHostInfo = new RegisteredHostInfo
             {
                 hostIPEndpoint = hostIPEndPoint,// hostIPEndPoint, new IPEndPoint(hostIPEndPoint.Address, 9000)
-                hostUID = parts[2],
+                hostUID = parts[1],
                 hostCurrentPlayers = short.Parse(parts[2]),
                 hostMaxPlayers = short.Parse(parts[3]),
                 hostLastSeen = nowTimestamp,
                 hostCountryCode = parts[4],
                 hostPort = short.Parse(parts[5]),
-                hostVersion = short.Parse(parts[6]),
+                hostVersion = float.Parse(parts[6]),
                 hostExtras = parts[7]
             };
             registeredHostInfo.Add(hostIPEndPoint, newHostInfo);

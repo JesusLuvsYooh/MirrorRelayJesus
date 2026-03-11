@@ -123,9 +123,10 @@ public class RelayGame : MonoBehaviour
             payload = "HEARTBEAT|";
         }
 
-       // payload += $"{hostUID}|{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}|{RelaySettingsGame.gamePort}|{RelaySettingsGame.maxPlayers}";
-        payload = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + "|" + hostUID + "|" + hostCurrentPlayers + "|" + RelaySettingsGame.maxPlayers + "|" + hostCountryCode + "|" + RelaySettingsGame.gamePort + "|" + hostVersion + "|" + hostExtras;
-       // REGISTER | FEE00F36 - 8151 - 5001 - AC38 - AB6242AA1B6F | 1772788967 | 7777 | 8
+       payload = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + "|" + hostUID + "|" + hostCurrentPlayers + "|" + RelaySettingsGame.maxPlayers + "|" + hostCountryCode + "|" + RelaySettingsGame.gamePort + "|" + hostVersion + "|" + hostExtras;
+        //payload = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + "|" + "123ABC" + "|" + 4 + "|" + 20 + "|" + "FR" + "|" + 7878 + "|" + 2.2 + "|" + hostExtras;
+        // REGISTER | FEE00F36 - 8151 - 5001 - AC38 - AB6242AA1B6F | 1772788967 | 7777 | 8
+        RelaySettingsShared.Log($"[Host] Payload: {payload}");
         payload = RelaySettingsShared.Encrypt(payload, RelaySettingsShared.hostRegisterSecret);
         Send(payload);
 

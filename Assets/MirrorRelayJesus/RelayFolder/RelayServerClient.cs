@@ -38,7 +38,13 @@ public class RelayServerClient
     {
         IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
         byte[] byteData = clientListener.EndReceive(ar, ref ipEndPoint);  // can this go later?
-       // RelaySettingsShared.Log($"[Relay Client] OnClientReceive: {ipEndPoint}");
+                                                                          // RelaySettingsShared.Log($"[Relay Client] OnClientReceive: {ipEndPoint}");
+        if (byteData == null || byteData.Length < 6 || byteData.Length > 2048)
+        {
+            RelaySettingsShared.LogWarning($"[Relay Client] Invalid packet size from {ipEndPoint}: {byteData?.Length}");
+            clientListener.BeginReceive(OnClientReceive, null);
+            return;
+        }
 
         if (!IsClientAllowed(ipEndPoint))
         {
@@ -64,6 +70,14 @@ public class RelayServerClient
 
         if (!clientToHostMap.TryGetValue(ipEndPoint, out var udpClient))
         {
+            // only block NEW relay clients
+            if (clientToHostMap.Count >= RelaySettings.maxRelayClients)
+            {
+                RelaySettingsShared.LogWarning("[Relay Client] Max relay clients reached.");
+                clientListener.BeginReceive(OnClientReceive, null);
+                return;
+            }
+
             udpClient = new UdpClient();
             // var hosts = new List<RegisteredHostInfo>(relayServer.relayServerHost.registeredHostInfo.Values);
             //Slightly faster version(no ToList allocation) If you want to avoid allocations:
@@ -75,6 +89,7 @@ var availableHosts = relayServer.relayServerHost.registeredHostInfo.Values
             if (count == 0)
             {
                 RelaySettingsShared.LogWarning("[Relay Client] No available hosts.");
+                clientListener.BeginReceive(OnClientReceive, null);
                 return;
             }
             RegisteredHostInfo randomHost =
@@ -162,7 +177,7 @@ var availableHosts = relayServer.relayServerHost.registeredHostInfo.Values
         }
 
         // --- DEBUG: log packets per second (once per second) ---
-        totalPpsThisSecond++;
+        //totalPpsThisSecond++;
 
         return true;
     }
@@ -170,7 +185,7 @@ var availableHosts = relayServer.relayServerHost.registeredHostInfo.Values
 
     public void Cleanup()
     {
-        RelaySettingsShared.Log($"[Relay] Total client PPS: {totalPpsThisSecond}");
+        //RelaySettingsShared.Log($"[Relay] Total client PPS: {totalPpsThisSecond}");
         totalPpsThisSecond = 0;
         //RelaySettingsShared.LogWarning($"[Relay Client] Cleanup!");
 
